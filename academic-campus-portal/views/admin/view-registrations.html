@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Registrations - Campus Event Portal</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 250px;
+            background: #2c3e50;
+            padding: 2rem 1rem;
+        }
+        .sidebar-menu {
+            list-style: none;
+        }
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+        .sidebar-menu a {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: #3498db;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.875rem;
+            margin-right: 0.25rem;
+        }
+        .filter-section {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .filter-section select {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar" style="position: fixed; width: 100%; top: 0; z-index: 100; margin-left: 250px;">
+        <span style="font-size: 1.25rem;">View Registrations</span>
+        <div class="navbar-links">
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </nav>
+
+    <div class="sidebar">
+        <h2 style="color: white; margin-bottom: 2rem; text-align: center;">Admin Panel</h2>
+        <ul class="sidebar-menu">
+            <li><a href="/admin/dashboard">Dashboard</a></li>
+            <li><a href="/admin/events">Manage Events</a></li>
+            <li><a href="/admin/registrations" class="active">View Registrations</a></li>
+            <li><a href="/admin/payment-settings">Payment Settings</a></li>
+            <li><a href="/">Back to Home</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content" style="margin-top: 80px;">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">All Registrations</h2>
+            </div>
+            
+            <div class="filter-section">
+                <select id="filterEvent" onchange="applyFilters()">
+                    <option value="">All Events</option>
+                </select>
+                <select id="filterStatus" onchange="applyFilters()">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+                <button class="btn btn-success" onclick="exportToExcel()">📊 Export to Excel</button>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Email</th>
+                            <th>Student ID</th>
+                            <th>Department</th>
+                            <th>Event</th>
+                            <th>Team Name</th>
+                            <th>Registered Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="registrationsTableBody">
+                        <tr>
+                            <td colspan="9"><div class="loading"><div class="spinner"></div></div></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/admin.js"></script>
+    <script>
+        async function applyFilters() {
+            const eventId = document.getElementById('filterEvent').value;
+            const status = document.getElementById('filterStatus').value;
+            await loadRegistrations(eventId || null, status || null);
+        }
+        
+        async function loadFilterEvents() {
+            try {
+                const data = await apiRequest('/api/admin/events');
+                const filterEvent = document.getElementById('filterEvent');
+                
+                data.events.forEach(event => {
+                    const option = document.createElement('option');
+                    option.value = event.id;
+                    option.textContent = event.title;
+                    filterEvent.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading events for filter', error);
+            }
+        }
+        
+        async function exportToExcel() {
+            const eventId = document.getElementById('filterEvent').value;
+            const status = document.getElementById('filterStatus').value;
+            
+            let url = '/api/admin/export?';
+            if (eventId) url += 'eventId=' + eventId + '&';
+            if (status) url += 'status=' + status;
+            
+            window.location.href = url;
+        }
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadFilterEvents();
+            await loadRegistrations();
+        });
+    </script>
+</body>
+</html>

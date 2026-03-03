@@ -1,0 +1,351 @@
+================================================================================
+ACADEMIC CAMPUS EVENT AND REGISTRATION PORTAL
+PROJECT EXPLANATION
+================================================================================
+
+================================================================================
+1. PROJECT OVERVIEW
+================================================================================
+
+The Academic Campus Event and Registration Portal is a comprehensive web-based system designed to manage campus events and student registrations efficiently. The system provides two distinct authentication pathways for administrators and students.
+
+Purpose:
+- Enable students to discover and register for campus events
+- Allow administrators to manage events and verify student registrations
+- Provide Excel export functionality for administrative reporting
+
+================================================================================
+2. USER ROLES AND AUTHENTICATION
+================================================================================
+
+A. ADMIN ROLE
+-------------
+The administrator has full control over the system with the following capabilities:
+
+1. Secure Login System
+   - Username: admin
+   - Password: admin123
+   - URL: http://localhost:3000/admin/login
+
+2. Admin Dashboard Features:
+   - View total number of events
+   - View total registrations
+   - View pending approvals count
+   - View total registered students
+
+3. Event Management:
+   - Create new events with full details
+   - Edit existing events
+   - Delete events
+   - Set event type (Academic, Sports, Cultural, Technical, Workshop)
+   - Configure location, date, and time
+   - Set registration deadlines
+   - Define maximum participants
+   - Configure team event settings
+
+4. Registration Management:
+   - View all student registrations
+   - Filter by event
+   - View student details
+   - Approve or reject registrations
+   - Add notes to registrations
+
+5. Excel Export Feature:
+   - Download registration data for any event
+   - Export includes:
+     * Student Name
+     * Email
+     * Student ID
+     * Department
+     * Event Name
+     * Event Date
+     * Team Name (if applicable)
+     * Team Members (if applicable)
+     * Registration Status
+     * Registration Date
+
+B. STUDENT ROLE
+---------------
+Students can register and participate in campus events:
+
+1. Student Registration:
+   - Register with: Full Name, Email, Student ID, Department, Phone, Password
+   - URL: http://localhost:3000/student/register
+
+2. Student Login:
+   - Login with registered email and password
+   - URL: http://localhost:3000/student/login
+
+3. Student Dashboard Features:
+   - View all available events
+   - Browse events by type
+   - Register for events (individual or team)
+   - View registration status (pending/approved/rejected)
+   - Cancel registrations if needed
+
+================================================================================
+3. DATABASE STRUCTURE
+================================================================================
+
+The system uses MySQL with three main tables:
+
+A. USERS TABLE
+--------------
+Stores both admin and student information:
+- id (Primary Key)
+- username (unique)
+- email (unique)
+- password_hash
+- role (admin/student)
+- full_name
+- department
+- student_id
+- phone
+- created_at
+- updated_at
+
+B. EVENTS TABLE
+---------------
+Stores all campus events:
+- id (Primary Key)
+- title
+- description
+- event_type
+- location
+- event_date
+- event_time
+- registration_deadline
+- max_participants
+- is_team_event (0/1)
+- max_team_size
+- status (active/cancelled/completed)
+- created_by (Foreign Key -> users.id)
+- created_at
+- updated_at
+
+C. REGISTRATIONS TABLE
+----------------------
+Links students to events:
+- id (Primary Key)
+- event_id (Foreign Key -> events.id)
+- user_id (Foreign Key -> users.id)
+- team_name
+- team_members (JSON/Text)
+- registration_date
+- status (pending/approved/rejected)
+- notes
+
+================================================================================
+4. TECHNOLOGY STACK
+================================================================================
+
+Frontend:
+- HTML5 - Page structure
+- CSS3 - Styling and responsive design
+- JavaScript (ES6+) - Client-side interactivity
+- AJAX/Fetch API - Server communication
+
+Backend:
+- Node.js - JavaScript runtime
+- Express.js - Web application framework
+- bcryptjs - Password hashing
+
+Database:
+- MySQL - Relational database
+- Credentials: username: root, password: 020502
+
+Additional Libraries:
+- exceljs - Excel file generation
+- xlsx - Excel file handling
+
+================================================================================
+5. PRE-LOADED EVENTS (10 Events)
+================================================================================
+
+1. Tech Symposium 2024
+   - Type: Academic
+   - Date: 2024-12-15
+   - Location: Main Auditorium
+   - Team Event: Yes (max 4 members)
+
+2. Sports Day
+   - Type: Sports
+   - Date: 2024-11-20
+   - Location: Sports Ground
+   - Team Event: Yes (max 6 members)
+
+3. Cultural Fest
+   - Type: Cultural
+   - Date: 2024-12-01
+   - Location: Open Air Theater
+   - Team Event: Yes (max 5 members)
+
+4. Hackathon 2024
+   - Type: Technical
+   - Date: 2024-11-30
+   - Location: Computer Lab Block A
+   - Team Event: Yes (max 4 members)
+
+5. Workshop: Web Development
+   - Type: Workshop
+   - Date: 2024-11-25
+   - Location: Lab 101
+   - Team Event: No (Individual)
+
+6. Science Fair
+   - Type: Academic
+   - Date: 2024-12-10
+   - Location: Science Block
+   - Team Event: Yes (max 3 members)
+
+7. Music Competition
+   - Type: Cultural
+   - Date: 2024-12-20
+   - Location: Music Hall
+   - Team Event: Yes (max 5 members)
+
+8. Robotics Workshop
+   - Type: Technical
+   - Date: 2024-11-28
+   - Location: Robotics Lab
+   - Team Event: Yes (max 2 members)
+
+9. Debate Competition
+   - Type: Academic
+   - Date: 2024-12-05
+   - Location: Conference Room A
+   - Team Event: No (Individual)
+
+10. Art Exhibition
+    - Type: Cultural
+    - Date: 2024-12-18
+    - Location: Art Gallery
+    - Team Event: No (Individual)
+
+================================================================================
+6. HOW TO RUN THE PROJECT
+================================================================================
+
+Prerequisites (recommended versions):
+- Node.js: v18.x or v20.x (LTS)
+- npm: bundled with Node (npm >= 8 recommended)
+- MySQL Server: 8.0 recommended (any recent 5.7+ or 8.x should work)
+- Optional tools: MySQL Workbench / HeidiSQL for DB GUI, Git for cloning
+
+Project dependencies (from package.json):
+- bcryptjs: ^2.4.3
+- body-parser: ^1.20.4
+- cors: ^2.8.6
+- ejs: ^4.0.1
+- exceljs: ^4.4.0
+- express: ^4.22.1
+- express-session: ^1.19.0
+- mysql2: ^3.18.2
+- xlsx: ^0.18.5
+
+Important database credential note:
+- The application reads DB credentials from `src/config/db.js`. The setup script `setup-db.js` uses the same connection settings when creating the schema.
+- Current values in the code (source of truth):
+  - Host: localhost
+  - User: root
+  - Password: kishor15 (see `src/config/db.js` and `setup-db.js`)
+  - Database: campus_event_portal
+- If your MySQL root password or user is different, update `src/config/db.js` and `setup-db.js` before running the setup script.
+
+Installation & run steps (Windows):
+1. Open PowerShell or Command Prompt and navigate to the project folder:
+
+   cd "D:\\Study Material\\6th Sem Notes\\Full Stack\\Web-site\\academic-campus-portal"
+
+2. Install Node dependencies:
+
+   npm install
+
+3. Ensure MySQL server is running. If you need to change the DB credentials, open `src/config/db.js` and `setup-db.js` and edit the `user`/`password` fields.
+
+4. Create the database schema and seed sample data (runs SQL and inserts admin user + sample events):
+
+   node setup-db.js
+
+   - This script uses the credentials inside `setup-db.js` to connect and create the `campus_event_portal` database and tables.
+
+5. Start the server:
+
+   npm start
+
+   or (equivalent):
+
+   node server.js
+
+6. Open the app in your browser:
+
+   - Home: http://localhost:3000
+   - Admin Login: http://localhost:3000/admin/login
+   - Student Login: http://localhost:3000/student/login
+
+Default admin account (created by `setup-db.js`):
+- Username: admin
+- Password: admin123
+
+Common troubleshooting:
+- If `node setup-db.js` fails with authentication errors, update the MySQL user/password in `setup-db.js` to match your MySQL server, then re-run.
+- If port 3000 is in use, stop the conflicting process or change the port in `server.js` (search for the port number there).
+- If dependency errors occur, remove `node_modules` and reinstall: `npm ci` or `npm install`.
+
+Development tips:
+- Use `npm run dev` (maps to `node server.js` in scripts) while developing.
+- Edit DB connection info in `src/config/db.js` to point to a different host/user if required.
+
+================================================================================
+7. PROJECT FEATURES SUMMARY
+================================================================================
+================================================================================
+7. PROJECT FEATURES SUMMARY
+================================================================================
+
+For Administrators:
+- [x] Secure login system
+- [x] Dashboard with statistics
+- [x] Create/Edit/Delete events
+- [x] View all registrations
+- [x] Approve/Reject registrations
+- [x] Download registrations in Excel format
+- [x] View student details
+
+For Students:
+- [x] Registration system
+- [x] Login system
+- [x] Browse available events
+- [x] Register for events (individual/team)
+- [x] View registration status
+- [x] Cancel registrations
+
+================================================================================
+8. FILE STRUCTURE
+================================================================================
+
+academic-campus-portal/
+├── package.json              - Project dependencies
+├── server.js                 - Main server file
+├── setup-db.js               - Database setup script
+├── database/
+│   └── schema.sql           - SQL schema
+├── src/
+│   ├── config/
+│   │   └── db.js            - Database configuration
+│   ├── routes/
+│   │   ├── authRoutes.js    - Authentication routes
+│   │   ├── adminRoutes.js   - Admin routes
+│   │   └── studentRoutes.js - Student routes
+│   └── controllers/         - Route handlers
+├── public/
+│   ├── css/                - Stylesheets
+│   └── js/                 - Client-side scripts
+└── views/
+    ├── index.html          - Home page
+    ├── admin/              - Admin pages
+    └── student/            - Student pages
+
+================================================================================
+END OF PROJECT EXPLANATION
+================================================================================

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Events - Campus Event Portal</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 250px;
+            background: #2c3e50;
+            padding: 2rem 1rem;
+        }
+        .sidebar-menu {
+            list-style: none;
+        }
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+        .sidebar-menu a {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: #3498db;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+        .team-member-box {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background: #f9f9f9;
+        }
+        .team-member-box input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        .total-amount {
+            background: #28a745;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+        .payment-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: #e7f3ff;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        .payment-checkbox input {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar" style="position: fixed; width: 100%; top: 0; z-index: 100; margin-left: 250px;">
+        <span style="font-size: 1.25rem;">Browse Events</span>
+        <div class="navbar-links">
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </nav>
+
+    <div class="sidebar">
+        <h2 style="color: white; margin-bottom: 2rem; text-align: center;">Student Panel</h2>
+        <ul class="sidebar-menu">
+            <li><a href="/student/dashboard">Dashboard</a></li>
+            <li><a href="/student/events" class="active">Browse Events</a></li>
+            <li><a href="/">Back to Home</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content" style="margin-top: 80px;">
+        <h1>Available Events</h1>
+        <p style="margin-bottom: 2rem;">Browse and register for upcoming campus events</p>
+        
+        <div class="event-grid" id="eventsContainer">
+            <div class="loading"><div class="spinner"></div></div>
+        </div>
+    </div>
+
+    <!-- Registration Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Register for: <span id="registerEventTitle"></span></h3>
+                <span class="modal-close" onclick="closeModal('registerModal')">&times;</span>
+            </div>
+            <input type="hidden" id="registerEventId">
+            <input type="hidden" id="isTeamEvent">
+            <input type="hidden" id="eventFeePerPerson">
+            <input type="hidden" id="maxTeamSizeValue">
+            
+            <!-- Fee Display -->
+            <div id="feeDisplay" style="background: #e7f3ff; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <strong>Fee per Person: Rs. <span id="eventFee">0</span></strong>
+            </div>
+            
+            <!-- Team Event Fields -->
+            <div id="teamFields" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label" for="teamName">Team Name</label>
+                    <input type="text" id="teamName" class="form-control" placeholder="Enter team name">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Team Members</label>
+                    <p style="font-size: 0.875rem; color: #666; margin-bottom: 0.5rem;">Max team size: <span id="maxTeamSize">1</span></p>
+                    <div id="teamMembersContainer">
+                        <!-- Team member input boxes will be added here dynamically -->
+                    </div>
+                    <button type="button" onclick="addTeamMember()" class="btn btn-secondary" style="margin-top: 0.5rem;">+ Add Member</button>
+                </div>
+            </div>
+            
+            <!-- Individual Registration -->
+            <div id="individualFields" style="display: none;">
+                <div class="form-group">
+                    <p style="padding: 1rem; background: #f0f0f0; border-radius: 8px;">You are registering as an individual</p>
+                </div>
+            </div>
+            
+            <!-- Total Amount -->
+            <div class="total-amount" id="totalAmountDisplay">
+                Total Amount: Rs. <span id="totalAmount">0</span>
+            </div>
+            
+            <!-- Payment Information -->
+            <div id="paymentInfo" style="background: #fff3cd; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <h4 style="margin: 0 0 0.5rem 0;">Payment Details</h4>
+                <div id="upiDetails" style="display: none;">
+                    <p><strong>UPI ID:</strong> <span id="upiIdDisplay"></span></p>
+                </div>
+                <div id="bankDetails" style="display: none;">
+                    <p><strong>Bank:</strong> <span id="bankNameDisplay"></span></p>
+                    <p><strong>Account:</strong> <span id="accountNumberDisplay"></span></p>
+                    <p><strong>IFSC:</strong> <span id="ifscCodeDisplay"></span></p>
+                    <p><strong>Holder:</strong> <span id="accountHolderDisplay"></span></p>
+                </div>
+            </div>
+            
+            <!-- Payment Confirmation -->
+            <div class="payment-checkbox">
+                <input type="checkbox" id="paymentConfirmed" onchange="updateSubmitButton()">
+                <label for="paymentConfirmed">I have made the payment of Rs. <span id="confirmAmount">0</span></label>
+            </div>
+            
+            <button onclick="submitRegistration()" id="submitBtn" class="btn btn-primary" style="width: 100%;" disabled>Submit Registration</button>
+        </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/student.js"></script>
+    <script>
+        let teamMemberCount = 1;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStudentEvents();
+        });
+        
+        function openRegistrationModal(eventId, eventTitle, isTeamEvent, maxTeamSize, feePerPerson, paymentSettings) {
+            document.getElementById('registerEventId').value = eventId;
+            document.getElementById('registerEventTitle').textContent = eventTitle;
+            document.getElementById('isTeamEvent').value = isTeamEvent;
+            document.getElementById('eventFeePerPerson').value = feePerPerson;
+            document.getElementById('maxTeamSizeValue').value = maxTeamSize;
+            document.getElementById('eventFee').textContent = feePerPerson;
+            document.getElementById('maxTeamSize').textContent = maxTeamSize;
+            
+            teamMemberCount = 1;
+            
+            // Show payment info
+            document.getElementById('paymentInfo').style.display = 'block';
+            if (paymentSettings) {
+                if (paymentSettings.upi_id) {
+                    document.getElementById('upiDetails').style.display = 'block';
+                    document.getElementById('upiIdDisplay').textContent = paymentSettings.upi_id;
+                }
+                if (paymentSettings.bank_name) {
+                    document.getElementById('bankDetails').style.display = 'block';
+                    document.getElementById('bankNameDisplay').textContent = paymentSettings.bank_name;
+                    document.getElementById('accountNumberDisplay').textContent = paymentSettings.account_number;
+                    document.getElementById('ifscCodeDisplay').textContent = paymentSettings.ifsc_code;
+                    document.getElementById('accountHolderDisplay').textContent = paymentSettings.account_holder_name;
+                }
+            }
+            
+            if (isTeamEvent === 1) {
+                document.getElementById('teamFields').style.display = 'block';
+                document.getElementById('individualFields').style.display = 'none';
+                document.getElementById('maxTeamSize').textContent = maxTeamSize;
+                renderTeamMembers();
+            } else {
+                document.getElementById('teamFields').style.display = 'none';
+                document.getElementById('individualFields').style.display = 'block';
+                teamMemberCount = 1;
+                calculateTotal();
+            }
+            
+            document.getElementById('registerModal').style.display = 'block';
+        }
+        
+        function renderTeamMembers() {
+            const container = document.getElementById('teamMembersContainer');
+            container.innerHTML = '';
+            const maxSize = parseInt(document.getElementById('maxTeamSizeValue').value) || 1;
+            
+            for (let i = 1; i <= teamMemberCount; i++) {
+                const box = document.createElement('div');
+                box.className = 'team-member-box';
+                box.innerHTML = `
+                    <label style="font-weight: bold;">Team Member ${i} ${i === 1 ? '(You)' : ''}</label>
+                    <input type="text" id="teamMember${i}" placeholder="Enter name" required>
+                `;
+                container.appendChild(box);
+            }
+            calculateTotal();
+        }
+        
+        function addTeamMember() {
+            const maxSize = parseInt(document.getElementById('maxTeamSizeValue').value) || 1;
+            if (teamMemberCount < maxSize) {
+                teamMemberCount++;
+                renderTeamMembers();
+            } else {
+                alert('Maximum team size reached!');
+            }
+        }
+        
+        function calculateTotal() {
+            const feePerPerson = parseFloat(document.getElementById('eventFeePerPerson').value) || 0;
+            const total = feePerPerson * teamMemberCount;
+            document.getElementById('totalAmount').textContent = total;
+            document.getElementById('confirmAmount').textContent = total;
+        }
+        
+        function updateSubmitButton() {
+            const isChecked = document.getElementById('paymentConfirmed').checked;
+            document.getElementById('submitBtn').disabled = !isChecked;
+        }
+        
+        async function submitRegistration() {
+            const eventId = document.getElementById('registerEventId').value;
+            const isTeamEvent = document.getElementById('isTeamEvent').value;
+            const teamName = document.getElementById('teamName').value;
+            const feePerPerson = parseFloat(document.getElementById('eventFeePerPerson').value) || 0;
+            
+            let teamMembers = [];
+            
+            if (isTeamEvent === '1') {
+                // Collect team member names from individual boxes
+                for (let i = 1; i <= teamMemberCount; i++) {
+                    const memberName = document.getElementById(`teamMember${i}`).value.trim();
+                    if (!memberName) {
+                        alert(`Please enter name for Team Member ${i}`);
+                        return;
+                    }
+                    teamMembers.push(memberName);
+                }
+                
+                if (!teamName) {
+                    alert('Please enter a team name');
+                    return;
+                }
+            } else {
+                // Individual registration - get user name from session
+                try {
+                    const sessionData = await apiRequest('/api/auth/session');
+                    if (sessionData.success && sessionData.user) {
+                        teamMembers = [sessionData.user.full_name];
+                    }
+                } catch (e) {
+                    console.error('Error getting session:', e);
+                }
+            }
+            
+            const paymentConfirmed = document.getElementById('paymentConfirmed').checked;
+            if (!paymentConfirmed) {
+                alert('Please confirm that you have made the payment');
+                return;
+            }
+            
+            try {
+                const data = await apiRequest('/api/student/register-event', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        event_id: eventId,
+                        team_name: teamName || null,
+                        team_members: teamMembers,
+                        is_team_event: isTeamEvent === '1',
+                        payment_amount: feePerPerson * teamMemberCount
+                    })
+                });
+                
+                if (data.success) {
+                    alert('Registration submitted successfully! Admin will verify your registration.');
+                    closeModal('registerModal');
+                    loadStudentEvents();
+                } else {
+                    alert(data.message || 'Registration failed');
+                }
+            } catch (error) {
+                alert('Error submitting registration: ' + error.message);
+            }
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+    </script>
+</body>
+</html>

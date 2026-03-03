@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Campus Event Portal</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .hero {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            border-radius: 0 0 50px 50px;
+        }
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            padding: 3rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .feature-card h3 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">🎓 Campus Event Portal</a>
+        <div class="navbar-links">
+            <a href="/student/login">Student Login</a>
+            <a href="/student/register">Student Register</a>
+            <a href="/admin/login">Admin Login</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>Academic Campus Event Portal</h1>
+        <p>Discover, Register, and Participate in Campus Events</p>
+        <div class="cta-buttons">
+            <a href="/student/register" class="btn btn-primary">Register Now</a>
+            <a href="/student/login" class="btn btn-secondary">Login</a>
+        </div>
+    </div>
+
+    <div class="features">
+        <div class="feature-card">
+            <div class="feature-icon">📅</div>
+            <h3>Browse Events</h3>
+            <p>View all upcoming campus events, workshops, and competitions</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">✅</div>
+            <h3>Easy Registration</h3>
+            <p>Register for events with just a few clicks</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">👥</div>
+            <h3>Team Events</h3>
+            <p>Participate in team events with your friends</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Admin Dashboard</h3>
+            <p>Manage events and registrations efficiently</p>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 Academic Campus Event Portal. All rights reserved.</p>
+    </footer>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>

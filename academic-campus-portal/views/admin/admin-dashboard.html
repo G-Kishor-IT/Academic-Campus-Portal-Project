@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Campus Event Portal</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 250px;
+            background: #2c3e50;
+            padding: 2rem 1rem;
+        }
+        .sidebar-menu {
+            list-style: none;
+        }
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+        .sidebar-menu a {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: #3498db;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar" style="position: fixed; width: 100%; top: 0; z-index: 100; margin-left: 250px;">
+        <span style="font-size: 1.25rem;">Admin Dashboard</span>
+        <div class="navbar-links">
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </nav>
+
+    <div class="sidebar">
+        <h2 style="color: white; margin-bottom: 2rem; text-align: center;">Admin Panel</h2>
+        <ul class="sidebar-menu">
+            <li><a href="/admin/dashboard" class="active">Dashboard</a></li>
+            <li><a href="/admin/events">Manage Events</a></li>
+            <li><a href="/admin/registrations">View Registrations</a></li>
+            <li><a href="/admin/payment-settings">Payment Settings</a></li>
+            <li><a href="/">Back to Home</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content" style="margin-top: 80px;">
+        <h1>Dashboard Overview</h1>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalEvents">0</div>
+                <div class="stat-label">Total Events</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalRegistrations">0</div>
+                <div class="stat-label">Total Registrations</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pendingRegistrations">0</div>
+                <div class="stat-label">Pending Approvals</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalStudents">0</div>
+                <div class="stat-label">Total Students</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Quick Actions</h2>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
+                <a href="/admin/events" class="btn btn-primary">Manage Events</a>
+                <a href="/admin/registrations" class="btn btn-success">View Registrations</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/admin.js"></script>
+    <script>
+        // Load dashboard stats on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboardStats();
+        });
+    </script>
+</body>
+</html>

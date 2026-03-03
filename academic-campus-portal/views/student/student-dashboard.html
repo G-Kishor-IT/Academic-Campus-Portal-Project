@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Campus Event Portal</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 250px;
+            background: #2c3e50;
+            padding: 2rem 1rem;
+        }
+        .sidebar-menu {
+            list-style: none;
+        }
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+        .sidebar-menu a {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: #3498db;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+        .profile-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        .payment-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .payment-badge.unpaid {
+            background: #fee;
+            color: #c00;
+        }
+        .payment-badge.paid {
+            background: #efe;
+            color: #080;
+        }
+        .payment-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .payment-modal.active {
+            display: flex;
+        }
+        .payment-modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .payment-details {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        .payment-option {
+            border: 2px solid #ddd;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .payment-option:hover, .payment-option.selected {
+            border-color: #3498db;
+            background: #f0f8ff;
+        }
+        .qr-code-display {
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .qr-code-display img {
+            max-width: 200px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar" style="position: fixed; width: 100%; top: 0; z-index: 100; margin-left: 250px;">
+        <span style="font-size: 1.25rem;">Student Dashboard</span>
+        <div class="navbar-links">
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </nav>
+
+    <div class="sidebar">
+        <h2 style="color: white; margin-bottom: 2rem; text-align: center;">Student Panel</h2>
+        <ul class="sidebar-menu">
+            <li><a href="/student/dashboard" class="active">Dashboard</a></li>
+            <li><a href="/student/events">Browse Events</a></li>
+            <li><a href="/">Back to Home</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content" style="margin-top: 80px;">
+        <h1>Welcome to Campus Event Portal</h1>
+        
+        <div class="profile-card">
+            <h2>My Profile</h2>
+            <p><strong>Name:</strong> <span id="profileName">Loading...</span></p>
+            <p><strong>Email:</strong> <span id="profileEmail">Loading...</span></p>
+            <p><strong>Student ID:</strong> <span id="profileStudentId">Loading...</span></p>
+            <p><strong>Department:</strong> <span id="profileDepartment">Loading...</span></p>
+            <p><strong>Phone:</strong> <span id="profilePhone">Loading...</span></p>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">My Registrations</h2>
+            <div id="myRegistrations">
+                <div class="loading"><div class="spinner"></div></div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 1.5rem;">
+            <a href="/student/events" class="btn btn-primary">Browse Available Events</a>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="payment-modal" id="paymentModal">
+        <div class="payment-modal-content">
+            <h2>Complete Payment</h2>
+            <div id="paymentEventDetails"></div>
+            
+            <div class="payment-details">
+                <p><strong>Amount to Pay:</strong> <span id="paymentAmount" style="font-size: 1.5rem; color: #2c3e50; font-weight: bold;"></span></p>
+            </div>
+            
+            <h3>Select Payment Method:</h3>
+            <div class="payment-option" onclick="selectPaymentMethod('upi')">
+                <strong>📱 UPI Payment</strong>
+                <p style="margin: 0.5rem 0 0; font-size: 0.9rem; color: #666;">Pay using UPI apps (GPay, PhonePe, Paytm)</p>
+            </div>
+            <div class="payment-option" onclick="selectPaymentMethod('bank')">
+                <strong>🏦 Bank Transfer</strong>
+                <p style="margin: 0.5rem 0 0; font-size: 0.9rem; color: #666;">Direct bank transfer / NEFT / RTGS</p>
+            </div>
+            
+            <div id="upiPaymentDetails" style="display: none; margin: 1rem 0;">
+                <div class="payment-details" id="upiDetails"></div>
+                <div class="qr-code-display" id="qrCodeDisplay"></div>
+            </div>
+            
+            <div id="bankPaymentDetails" style="display: none; margin: 1rem 0;">
+                <div class="payment-details" id="bankDetails"></div>
+            </div>
+            
+            <div style="margin-top: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem;"><strong>Transaction ID / Reference Number:</strong></label>
+                <input type="text" id="transactionId" placeholder="Enter your transaction ID" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 1rem;">
+            </div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button class="btn btn-primary" onclick="submitPayment()">Submit Payment</button>
+                <button class="btn" onclick="closePaymentModal()" style="background: #95a5a6;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/student.js"></script>
+    <script>
+        let selectedPaymentMethod = '';
+        let currentRegistrationId = null;
+        let currentPaymentSettings = null;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStudentProfile();
+            loadMyRegistrations();
+        });
+        
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            document.querySelectorAll('.payment-option').forEach(el => el.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+            
+            document.getElementById('upiPaymentDetails').style.display = method === 'upi' ? 'block' : 'none';
+            document.getElementById('bankPaymentDetails').style.display = method === 'bank' ? 'block' : 'none';
+        }
+        
+        function openPaymentModal(registrationId) {
+            currentRegistrationId = registrationId;
+            fetch(`/api/student/registration/${registrationId}/payment`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const reg = data.registration;
+                        const ps = data.paymentSettings;
+                        currentPaymentSettings = ps;
+                        
+                        document.getElementById('paymentEventDetails').innerHTML = `
+                            <p><strong>Event:</strong> ${reg.event_title}</p>
+                            <p><strong>Date:</strong> ${new Date(reg.event_date).toLocaleDateString()}</p>
+                            <p><strong>Location:</strong> ${reg.location}</p>
+                        `;
+                        document.getElementById('paymentAmount').textContent = `₹${reg.payment_amount}`;
+                        
+                        // UPI Details
+                        if (ps && ps.upi_id) {
+                            document.getElementById('upiDetails').innerHTML = `
+                                <p><strong>UPI ID:</strong> ${ps.upi_id}</p>
+                                <p style="font-size: 0.85rem; color: #666;">Open your UPI app and send ₹${reg.payment_amount} to this UPI ID</p>
+                            `;
+                            if (ps.qr_code) {
+                                document.getElementById('qrCodeDisplay').innerHTML = `
+                                    <p><strong>Scan QR Code:</strong></p>
+                                    <img src="${ps.qr_code}" alt="Payment QR Code">
+                                `;
+                            }
+                        } else {
+                            document.getElementById('upiDetails').innerHTML = '<p style="color: #c00;">UPI payment not available</p>';
+                        }
+                        
+                        // Bank Details
+                        if (ps && ps.bank_name) {
+                            document.getElementById('bankDetails').innerHTML = `
+                                <p><strong>Bank Name:</strong> ${ps.bank_name}</p>
+                                <p><strong>Account Number:</strong> ${ps.account_number}</p>
+                                <p><strong>IFSC Code:</strong> ${ps.ifsc_code}</p>
+                                <p><strong>Account Holder:</strong> ${ps.account_holder_name}</p>
+                                <p style="font-size: 0.85rem; color: #666;">Transfer ₹${reg.payment_amount} and enter transaction ID</p>
+                            `;
+                        } else {
+                            document.getElementById('bankDetails').innerHTML = '<p style="color: #c00;">Bank transfer not available</p>';
+                        }
+                        
+                        document.getElementById('paymentModal').classList.add('active');
+                    } else {
+                        alert(data.message);
+                    }
+                });
+        }
+        
+        function closePaymentModal() {
+            document.getElementById('paymentModal').classList.remove('active');
+            selectedPaymentMethod = '';
+            currentRegistrationId = null;
+            document.getElementById('transactionId').value = '';
+            document.querySelectorAll('.payment-option').forEach(el => el.classList.remove('selected'));
+            document.getElementById('upiPaymentDetails').style.display = 'none';
+            document.getElementById('bankPaymentDetails').style.display = 'none';
+        }
+        
+        function submitPayment() {
+            if (!selectedPaymentMethod) {
+                alert('Please select a payment method');
+                return;
+            }
+            
+            const transactionId = document.getElementById('transactionId').value;
+            
+            fetch('/api/student/submit-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    registration_id: currentRegistrationId,
+                    payment_method: selectedPaymentMethod,
+                    transaction_id: transactionId
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    closePaymentModal();
+                    loadMyRegistrations();
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

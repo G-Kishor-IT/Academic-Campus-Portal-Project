@@ -1,0 +1,314 @@
+================================================================================
+COMPREHENSIVE PROMPT FOR ACADEMIC CAMPUS EVENT AND REGISTRATION PORTAL
+================================================================================
+
+You are an expert full-stack web developer with 20 years of experience in building scalable academic management systems. Your task is to create a complete "Academic Campus Event and Registration Portal" from scratch.
+
+================================================================================
+PROJECT OVERVIEW
+================================================================================
+
+The Academic Campus Event and Registration Portal is a web application that facilitates event management and student registration for campus events. The system has two distinct user roles:
+
+1. ADMIN ROLE:
+   - Secure login system for administrators
+   - View all registered students for events
+   - Verify/approve student registrations
+   - Manage events (create, edit, delete events)
+   - Download registration data in Excel/CSV format (including team names, student details)
+   - Dashboard showing event statistics
+
+2. STUDENT ROLE:
+   - Student registration and login
+   - Browse available campus events
+   - Register for events (individual or team registration)
+   - View their registration status
+   - Submit registration with confirmation
+
+================================================================================
+TECHNOLOGY STACK
+================================================================================
+
+Frontend:
+- HTML5 for structure
+- CSS3 for styling (responsive design)
+- JavaScript (Vanilla ES6+) for interactivity
+- Client-side form validation
+- AJAX/Fetch API for server communication
+
+Backend:
+- Node.js as runtime environment
+- Express.js as web framework
+- MySQL for database (credentials: username: root, password: kishor15)
+- bcrypt for password hashing
+- express-session for authentication
+- exceljs or xlsx library for Excel export functionality
+- cors for cross-origin requests
+
+Database:
+- MySQL (separate SQL file to run in MySQL Workbench)
+
+================================================================================
+FOLDER STRUCTURE
+================================================================================
+
+Create the following folder structure:
+
+academic-campus-portal/
+├── public/
+│   ├── css/
+│   │   ├── style.css
+│   │   ├── admin.css
+│   │   ├── student.css
+│   │   └── responsive.css
+│   ├── js/
+│   │   ├── main.js
+│   │   ├── admin.js
+│   │   ├── student.js
+│   │   └── validation.js
+│   ├── images/
+│   └── uploads/
+├── views/
+│   ├── index.html
+│   ├── admin/
+│   │   ├── admin-login.html
+│   │   ├── admin-dashboard.html
+│   │   ├── manage-events.html
+│   │   ├── view-registrations.html
+│   │   └── export-data.html
+│   └── student/
+│       ├── student-register.html
+│       ├── student-login.html
+│       ├── student-dashboard.html
+│       ├── event-list.html
+│       └── event-registration.html
+├── src/
+│   ├── config/
+│   │   └── db.js
+│   ├── models/
+│   │   ├── User.js
+│   │   ├── Event.js
+│   │   └── Registration.js
+│   ├── routes/
+│   │   ├── adminRoutes.js
+│   │   ├── studentRoutes.js
+│   │   └── authRoutes.js
+│   ├── controllers/
+│   │   ├── adminController.js
+│   │   ├── studentController.js
+│   │   └── authController.js
+│   └── middleware/
+│       ├── authMiddleware.js
+│       └── adminMiddleware.js
+├── database/
+│   └── schema.sql
+├── package.json
+├── server.js
+└── README.md
+
+================================================================================
+DATABASE SCHEMA (MySQL)
+================================================================================
+
+Create a comprehensive MySQL database with the following tables. Save this as database/schema.sql:
+
+-- Database Creation
+CREATE DATABASE IF NOT EXISTS campus_event_portal;
+USE campus_event_portal;
+
+-- Users Table (Admins and Students)
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'student') NOT NULL,
+    full_name VARCHAR(150) NOT NULL,
+    department VARCHAR(100),
+    student_id VARCHAR(50),
+    phone VARCHAR(20),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Events Table
+CREATE TABLE events (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    event_type VARCHAR(100),
+    location VARCHAR(200),
+    event_date DATE NOT NULL,
+    event_time TIME NOT NULL,
+    registration_deadline DATE,
+    max_participants INT,
+    is_team_event TINYINT(1) DEFAULT 0,
+    max_team_size INT DEFAULT 1,
+    status ENUM('active', 'cancelled', 'completed') DEFAULT 'active',
+    created_by INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES users(id)
+);
+
+-- Registrations Table
+CREATE TABLE registrations (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    event_id INT NOT NULL,
+    user_id INT NOT NULL,
+    team_name VARCHAR(100),
+    team_members TEXT,
+    registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    notes TEXT,
+    FOREIGN KEY (event_id) REFERENCES events(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- Admin Credentials (password: admin123 - hashed)
+INSERT INTO users (username, email, password_hash, role, full_name) VALUES
+('admin', 'admin@campus.edu', '$2b$10$XQxBhHqKqXqKqXqKqXqKqOeXqKqXqKqXqKqXqKqXqKqXqKqXqK', 'admin', 'System Administrator');
+
+================================================================================
+BACKEND REQUIREMENTS (Node.js/Express)
+================================================================================
+
+1. Server Setup (server.js):
+   - Initialize Express application
+   - Configure middleware (body-parser, cors, session)
+   - Connect to MySQL database
+   - Set up static file serving
+   - Configure routes
+
+2. Authentication System:
+   - JWT-based or session-based authentication
+   - bcrypt password hashing
+   - Role-based access control (admin vs student)
+   - Login/Register endpoints
+
+3. Admin Features:
+   - POST /api/admin/login - Admin login
+   - GET /api/admin/dashboard - Get dashboard statistics
+   - GET /api/admin/events - Get all events
+   - POST /api/admin/events - Create new event
+   - PUT /api/admin/events/:id - Update event
+   - DELETE /api/admin/events/:id - Delete event
+   - GET /api/admin/registrations - Get all registrations
+   - PUT /api/admin/registrations/:id - Approve/Reject registration
+   - GET /api/admin/export/:eventId - Export to Excel
+
+4. Student Features:
+   - POST /api/student/register - Student registration
+   - POST /api/student/login - Student login
+   - GET /api/student/events - Get available events
+   - POST /api/student/register-event - Register for an event
+   - GET /api/student/my-registrations - Get own registrations
+
+5. Excel Export Functionality:
+   - Use 'exceljs' or 'xlsx' library
+   - Export fields: Student Name, Email, Student ID, Department, Event Name, Event Date, Team Name, Team Members, Registration Status, Registration Date
+   - Support filtering by event and date range
+
+================================================================================
+FRONTEND REQUIREMENTS
+================================================================================
+
+1. General:
+   - Responsive design for all devices
+   - Clean, modern UI with campus theme
+   - Form validation on client-side
+   - Loading indicators
+   - Toast notifications for actions
+
+2. Admin Pages:
+   - Login page with username/password
+   - Dashboard with statistics cards
+   - Event management (CRUD operations)
+   - Registration management with filters
+   - Excel download button for each event
+   - Search and filter functionality
+
+3. Student Pages:
+   - Registration form (name, email, student ID, department, password)
+   - Login page
+   - Event listing with details
+   - Event registration form (individual/team)
+   - My registrations page with status
+
+================================================================================
+SPECIFIC FEATURES TO IMPLEMENT
+================================================================================
+
+1. Authentication:
+   - Separate login pages for admin and student
+   - Session management with timeout
+   - Password strength validation
+   - Remember me functionality
+
+2. Event Management:
+   - Create events with all details
+   - Set registration deadlines
+   - Configure max participants
+   - Team event support (with team size limit)
+
+3. Registration Process:
+   - Student selects event
+   - Choose individual or team registration
+   - Enter team name and member details (for team events)
+   - Submit registration
+   - Receive confirmation
+
+4. Admin Verification:
+   - View all registrations per event
+   - Approve or reject registrations
+   - Add notes to registrations
+   - Bulk actions
+
+5. Excel Export:
+   - Download button per event
+   - Include all registration fields
+   - Format: Student Name | Email | Student ID | Department | Event Name | Event Date | Team Name | Team Members | Status | Registered Date
+   - CSV or XLSX format
+
+================================================================================
+SAMPLE CREDENTIALS
+================================================================================
+
+Admin:
+- Username: admin
+- Password: admin123
+- Email: admin@campus.edu
+
+Student (sample for testing):
+- Can register through student registration form
+
+================================================================================
+INSTALLATION INSTRUCTIONS
+================================================================================
+
+1. Install Node.js (if not installed)
+2. Create project folder
+3. Run: npm init -y
+4. Install dependencies:
+   npm install express mysql2 bcryptjs express-session cors body-parser xlsx exceljs
+5. Set up MySQL database using schema.sql
+6. Run: node server.js
+7. Access: http://localhost:3000
+
+================================================================================
+IMPORTANT NOTES
+================================================================================
+
+- Use proper error handling throughout
+- Implement input sanitization
+- Use parameterized queries to prevent SQL injection
+- Hash all passwords with bcrypt
+- Validate all user inputs
+- Handle edge cases (full events, past deadlines, etc.)
+- Make the UI intuitive and user-friendly
+- Include proper loading states
+- Add confirmation dialogs for destructive actions
+
+================================================================================
+
+Now create the complete project following this structure. Ensure all files are properly created with working code, and the application is fully functional from start to end.
